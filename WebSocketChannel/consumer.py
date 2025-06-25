@@ -44,24 +44,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = data.get("message")
         sender = data.get("sender")
         idSender = data.get("senderId")
+        idUserMention = data.get("mention")
 
         if message:
             redis_entry = {
                 "message": message,
                 "fullname": sender or "Unknown",
-                "userId": idSender or "Unknown"
+                "userId": idSender or "Unknown",
+                "mention": idUserMention or "",
             }
 
             # Send live via pub/sub
-            r.publish(self.channel_name, message)
+            r.publish(self.channel_name, json.dumps(redis_entry))
 
             # Persist full structure in stream
             r.xadd(self.channel_name, redis_entry)
 
     async def send_to_socket(self, message):
-        await self.send(text_data=json.dumps({
-            'message': message.decode('utf-8')
-        }))
+        parsed = json.loads(message.decode('utf-8'))
+        await self.send(text_data=json.dumps(parsed))
 
     def listen_to_redis(self):
         try:
