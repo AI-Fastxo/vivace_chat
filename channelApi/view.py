@@ -109,3 +109,21 @@ class RedisChannelMessagesView(APIView):
             "messages": result
         })
 
+
+class RedisChannelMessageDeleteView(APIView):
+    def delete(self, request, chatFullId, id_redis):
+        r = redis.Redis(host='192.168.201.40', port=6379, db=0)
+
+        # Ejecutar XDEL
+        deleted_count = r.xdel(chatFullId, id_redis)
+
+        if deleted_count == 1:
+            return Response({
+                "success": True,
+                "message": f"Mensaje {id_redis} eliminado del stream {chatFullId}"
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "success": False,
+                "error": f"No se encontró el mensaje {id_redis} en {chatFullId}"
+            }, status=status.HTTP_404_NOT_FOUND)
