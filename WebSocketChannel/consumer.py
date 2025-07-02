@@ -57,6 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             r.publish("notifications", json.dumps({
                 "chat": self.chat_name,
+                "short": self.chat_name.split(':')[0],
                 "sender": sender,
                 "userId": idSender,
                 "mention": idUserMention,

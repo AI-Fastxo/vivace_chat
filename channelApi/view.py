@@ -127,3 +127,33 @@ class RedisChannelMessageDeleteView(APIView):
                 "success": False,
                 "error": f"No se encontró el mensaje {id_redis} en {chatFullId}"
             }, status=status.HTTP_404_NOT_FOUND)
+
+class RedisUnreadCountView(APIView):
+    def post(self, request):
+        r = redis.Redis(host='192.168.201.40', port=6379, db=0)
+
+        chat_names = request.data.get("chatNames", [])
+
+        if not isinstance(chat_names, list) or not chat_names:
+            return Response({"error": "chatNames debe ser una lista no vacía"}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = []
+
+        for chat_name in chat_names:
+            try:
+                count = r.xlen(chat_name)  # cuenta total de mensajes en el stream
+                result.append({
+                    "chat": chat_name,
+                    "count": count
+                })
+            except Exception as e:
+                result.append({
+                    "chat": chat_name,
+                    "count": 0,
+                    "error": str(e)
+                })
+
+        return Response({
+            "success": True,
+            "data": result
+        }, status=status.HTTP_200_OK)
