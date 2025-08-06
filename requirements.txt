@@ -4,3 +4,26 @@ channels
 daphne
 redis
 django-cors-headers
+
+
+
+
+# Actualizar sistema y herramientas básicas
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y build-essential curl git
+
+# Instalar Python 3, pip y redis
+sudo apt install -y python3 python3-pip redis-server
+
+# Instalar dependencias globales de Python para tu proyecto Django
+sudo pip3 install --upgrade pip
+sudo pip3 install Django==5.2.3 djangorestframework channels daphne redis django-cors-headers
+
+# Iniciar y habilitar Redis
+sudo systemctl enable redis
+sudo systemctl start redis
+
+# Verificación final
+python3 --version
+pip3 --version
+redis-cli ping
